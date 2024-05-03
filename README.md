@@ -12,8 +12,8 @@ This project is a FastAPI backend designed to manage a Dosa restaurant's operati
 ## Project Structure
 - `/database`: Contains the database initialization script (`init_db.py`) for creating tables using SQLAlchemy ORM.
 - `/app`: Contains the main FastAPI application (`main.py`) responsible for handling HTTP requests and responses.
-  - `/models`: Contains SQLAlchemy ORM models (`models.py`) defining database tables.
-  - `/schemas`: Contains Pydantic models (`schemas.py`) for request validation and response objects.
+- `/models`: Contains SQLAlchemy ORM models (`models.py`) defining database tables.
+- `/schemas`: Contains Pydantic models (`schemas.py`) for request validation and response objects.
 - `/utils`: Contains utility functions and configurations.
 
 ## Getting Started
