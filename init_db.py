@@ -2,48 +2,51 @@ import sqlite3
 
 def init_db():
     """
-    Initialize the database and create tables with relational integrity.
+    Further refine the database structure, enhancing data integrity and detail in preparation for final functionalities.
     """
-    # Establish a connection to the SQLite database. If it doesn't exist, it will be created.
     conn = sqlite3.connect('db.sqlite')
     cursor = conn.cursor()
 
-    # Create a table for customers
+    # Enhance the customers table with additional data integrity constraints
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS customers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        phone TEXT UNIQUE NOT NULL
+        phone TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE  -- Adding an email field for future contact management
     );
     ''')
 
-    # Create a table for items (menu items in the restaurant)
+    # Enhance the items table by adding a category field
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        price REAL NOT NULL,
-        description TEXT
+        price REAL NOT NULL CHECK (price >= 0),  -- Ensure no negative prices
+        description TEXT,
+        category TEXT DEFAULT 'General'  -- New field to categorize menu items
     );
     ''')
 
-    # Create a table for orders
+    # Add a status field to orders to track order progress
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         customer_id INTEGER NOT NULL,
-        timestamp INTEGER NOT NULL,
+        timestamp INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+        status TEXT NOT NULL DEFAULT 'Pending',  -- New field to track the status of the order
         notes TEXT,
         FOREIGN KEY (customer_id) REFERENCES customers(id)
     );
     ''')
 
-    # Create a table for order_items to handle the many-to-many relationship between orders and items
+    # Include a unit price in order_items to preserve the price at the time of the order
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS order_items (
         order_id INTEGER NOT NULL,
         item_id INTEGER NOT NULL,
         quantity INTEGER DEFAULT 1,
+        unit_price REAL,  -- Capture price at the time of the order
         PRIMARY KEY (order_id, item_id),
         FOREIGN KEY (order_id) REFERENCES orders(id),
         FOREIGN KEY (item_id) REFERENCES items(id)
@@ -55,4 +58,4 @@ def init_db():
     conn.close()
 
 if __name__ == "__main__":
-    init_db()  # Initialize the database by creating necessary tables.
+    init_db()  # Initialize the database by enhancing the tables.
