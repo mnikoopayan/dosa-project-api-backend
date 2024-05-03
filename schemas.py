@@ -1,6 +1,4 @@
-"""Module defining enhanced Pydantic models for data validation and serialization for a Dosa restaurant system.
-This stage refines relationships and introduces optional fields for more complex data handling.
-"""
+"""Module defining Pydantic models for data validation and serialization of API responses for a Dosa restaurant system."""
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -15,23 +13,27 @@ class CustomerCreate(CustomerBase):
     pass
 
 class CustomerResponse(CustomerBase):
-    """Response model for returning customer data, includes the customer ID."""
+    """Model for returning customer data, includes the customer ID."""
     id: int
+
+    class Config:
+        from_attributes = True
 
 class ItemBase(BaseModel):
     """Base model for item data, includes fields shared by creation and reading operations."""
     name: str
     price: float
-    description: Optional[str] = None  # Optional field for item description
 
 class ItemCreate(ItemBase):
     """Model for creating a new item, inherits base item fields."""
     pass
 
 class ItemResponse(ItemBase):
-    """Response model for returning item data, includes the item ID and optional description."""
+    """Model for returning item data, includes the item ID."""
     id: int
-    description: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class OrderItemBase(BaseModel):
     """Base model for order item data, used for linking items and orders."""
@@ -43,23 +45,27 @@ class OrderItemCreate(OrderItemBase):
     pass
 
 class OrderItemResponse(OrderItemBase):
-    """Intermediate response model for order items, includes an optional link to the detailed item response."""
+    """Model for returning order item data, includes detailed item information."""
     id: int
-    item: Optional[ItemResponse] = None
+    item: ItemResponse  # Ensure that `ItemResponse` is correctly defined or imported
+
+    class Config:
+        from_attributes = True
 
 class OrderBase(BaseModel):
     """Base model for order data, includes fields shared by creation and reading operations."""
     customer_id: int
     timestamp: int
-    notes: Optional[str] = None  # Optional field for additional notes on the order
+    notes: Optional[str] = None
 
 class OrderCreate(OrderBase):
-    """Model for creating a new order, includes details about items in the order and optional notes."""
+    """Model for creating a new order, includes details about items in the order."""
     items: List[OrderItemCreate] = []
 
 class OrderResponse(OrderBase):
-    """Response model for returning order data, includes a detailed list of order items and optional notes."""
+    """Model for returning order data, includes detailed list of order items."""
     id: int
     items: List[OrderItemResponse] = []
-    notes: Optional[str] = None
 
+    class Config:
+        from_attributes = True

@@ -1,50 +1,47 @@
-"""Intermediate module for defining database models for a Dosa restaurant management system.
-This stage introduces more complex relationships and additional fields for existing models.
-"""
+"""Module for defining database models for a Dosa restaurant management system."""
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, create_engine, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
 class Customer(Base):
-    """Data model for customers, expanding to include optional address details."""
+    """Data model for customers, storing customer details such as name and phone number."""
     __tablename__ = 'customers'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     phone = Column(String, unique=True, nullable=False)
-    address = Column(String)  # New field for customer address
 
 class Item(Base):
-    """Data model for items, now including a description and category for menu items."""
+    """Data model for items, representing menu items in the restaurant with name and price."""
     __tablename__ = 'items'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     price = Column(Float, nullable=False)
-    description = Column(String)  # New field for item description
-    category = Column(String)  # New field to categorize items
+    orders = relationship("OrderItem", back_populates="item")
 
 class Order(Base):
-    """Enhanced data model for orders, including timestamps and optional notes."""
+    """Data model for orders, storing details about customer orders including the customer and items ordered."""
     __tablename__ = 'orders'
     id = Column(Integer, primary_key=True)
     customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
-    timestamp = Column(DateTime)  # Changed from Integer to DateTime for more accurate time tracking
-    notes = Column(String)  # Optional field for additional order notes
-    customer = relationship("Customer", backref="orders")
+    timestamp = Column(Integer, nullable=False)
+    notes = Column(String, nullable=True)
+    customer = relationship("Customer")
+    items = relationship("OrderItem", back_populates="order")
 
 class OrderItem(Base):
-    """Refined model for order items, including quantity and additional item details."""
+    """Data model for order items, representing the many-to-many relationship between orders and items with quantity tracking."""
     __tablename__ = 'order_items'
     order_id = Column(Integer, ForeignKey('orders.id'), primary_key=True)
     item_id = Column(Integer, ForeignKey('items.id'), primary_key=True)
     quantity = Column(Integer, default=1)
-    order = relationship("Order", backref=backref("order_items", cascade="all, delete-orphan"))
-    item = relationship("Item", backref=backref("order_items"))
+    order = relationship("Order", back_populates="items")
+    item = relationship("Item", back_populates="orders")
 
 def init_db():
-    """Enhances the database initialization to reflect the updated model definitions."""
+    """Initializes the database by creating all tables based on the defined models."""
     engine = create_engine('sqlite:///./db.sqlite', echo=True)
     Base.metadata.create_all(engine)
 
